@@ -4,27 +4,45 @@ import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.Matchers;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 
 public class CreateCourierTest {
+    private CourierClient courierClient;
+    private String randomLogin;
+    private String randomPassword;
+    private Integer courierId;
 
     @Before
     public void setUp() {
-        RestAssured.baseURI = "https://qa-scooter.praktikum-services.ru";
+        RestAssured.baseURI = CourierClient.BASE_URL;
+
+        courierClient = new CourierClient();
+
+        randomLogin = RandomStringUtils.randomAlphanumeric(2, 15); // Генерируем случайный логин
+        randomPassword = RandomStringUtils.randomAlphanumeric(7, 15); // Генерируем случайный пароль
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        courierId = courierClient.loginCourier(new Courier(randomLogin, randomPassword)).body().path("id");        //createCourier(randomLogin, randomPassword); // Создаем курьера перед тестами
+        if (courierId != null) {
+            courierClient.deleteCourier(courierId)
+                    .then().log().all()
+                    .assertThat().statusCode(200)
+                    .body("ok", Matchers.is(true));
+        }
     }
 
     @Test
     @Step("Создание учетной записи курьера")
     @Description("Проверка состояние кода и значений для полей /api/v1/courier")
     public void createCourierTest() {
-        CourierClient courierClient = new CourierClient();
-        String login = RandomStringUtils.randomAlphanumeric(2, 15);
-        String password = RandomStringUtils.randomAlphanumeric(7, 15);
         String firstName = RandomStringUtils.randomAlphabetic(2, 18);
-        Response postRequestCreateCourier = courierClient.createCourier(new Courier(login, password, firstName));
-        postRequestCreateCourier.then().log().all()
+        courierClient.createCourier(new Courier(randomLogin, randomPassword, firstName))
+                .then().log().all()
                 .assertThat().statusCode(201).and()
                 .body("ok", Matchers.is(true));
     }
@@ -33,11 +51,8 @@ public class CreateCourierTest {
     @Step("Создание курьера без имени курьера")
     @Description("Проверка состояние кода и сообщение при создании курьера без имени курьера")
     public void creatingCourierWithoutFirstName() {
-        CourierClient courierClient = new CourierClient();
-        String login = RandomStringUtils.randomAlphanumeric(2, 15);
-        String password = RandomStringUtils.randomAlphanumeric(7, 15);
-        Response postRequestCreateCourier = courierClient.createCourier(new Courier(login, password));
-        postRequestCreateCourier.then().log().all()
+        courierClient.createCourier(new Courier(randomLogin, randomPassword))
+                .then().log().all()
                 .assertThat().statusCode(201).and()
                 .body("ok", Matchers.is(true));
     }
@@ -50,15 +65,12 @@ public class CreateCourierTest {
     @Step("Создание курьеров с одинаковыми логинами")
     @Description("Проверка состояние кода и сообщение при создании двух курьеров с одинаковыми логинами")
     public void creatingTwoIdenticalLoginCouriers() {
-        CourierClient courierClient = new CourierClient();
-        String login = RandomStringUtils.randomAlphanumeric(2, 15);
-        String password = RandomStringUtils.randomAlphanumeric(7, 15);
         String firstName = RandomStringUtils.randomAlphabetic(2, 18);
-        courierClient.createCourier(new Courier(login, password, firstName))
+        courierClient.createCourier(new Courier(randomLogin, randomPassword, firstName))
                 .then().log().all()
                 .assertThat().statusCode(201).and()
                 .body("ok", Matchers.is(true));
-        courierClient.createCourier(new Courier(login, password, firstName))
+        courierClient.createCourier(new Courier(randomLogin, randomPassword, firstName))
                 .then().log().all()
                 .assertThat().statusCode(409).and()
                 .body("message", Matchers.equalTo("Этот логин уже используется. Попробуйте другой."));
@@ -69,7 +81,6 @@ public class CreateCourierTest {
     @Step("Создание курьера без логина")
     @Description("Проверка состояние кода и сообщение при создании курьера без логина")
     public void creatingCourierWithoutLogin() {
-        CourierClient courierClient = new CourierClient();
         Response postRequestCreateCourier = courierClient.createCourier(new Courier("", "secret", "empty"));
         postRequestCreateCourier.then().log().all()
                 .assertThat().statusCode(400).and()
@@ -80,7 +91,6 @@ public class CreateCourierTest {
     @Step("Создание курьера без пароля")
     @Description("Проверка состояние кода и сообщение при создании курьера без пароля")
     public void creatingCourierWithoutPassword() {
-        CourierClient courierClient = new CourierClient();
         Response postRequestCreateCourier = courierClient.createCourier(new Courier("julia", "", "tester"));
         postRequestCreateCourier.then().log().all()
                 .assertThat().statusCode(400).and()
@@ -91,7 +101,6 @@ public class CreateCourierTest {
     @Step("Создание курьера без логина и пароля")
     @Description("Проверка состояние кода и сообщение при создании курьера без логина и пароля")
     public void creatingCourierWithoutLoginAndPassword() {
-        CourierClient courierClient = new CourierClient();
         Response postRequestCreateCourier = courierClient.createCourier(new Courier("", "", "tester"));
         postRequestCreateCourier.then().log().all()
                 .assertThat().statusCode(400).and()

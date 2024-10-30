@@ -1,113 +1,81 @@
 import io.qameta.allure.Step;
-import org.junit.After;
-import org.junit.Before;
+import io.restassured.RestAssured;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.hamcrest.Matchers;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.util.Random;
-
-import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 
 public class LoginCourierTest {
-    private static final String BASE_URL = "https://qa-scooter.praktikum-services.ru/api/v1/courier/login";
-    private String randomLogin;
-    private String password = "12345"; // Пароль должен совпадать с тем, что использовался при создании курьера
+    private static CourierClient courierClient;
+    private static String randomLogin;
+    private static String randomPassword;
+    private static Integer courierId;
 
-    // Генерация случайного логина
-    private String generateRandomLogin(int length) {
-        String characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        Random random = new Random();
-        StringBuilder login = new StringBuilder(length);
+    @BeforeClass
+    public static void setUp() {
+        RestAssured.baseURI = CourierClient.BASE_URL;
 
-        for (int i = 0; i < length; i++) {
-            int index = random.nextInt(characters.length());
-            login.append(characters.charAt(index));
-        }
+        courierClient = new CourierClient();
 
-        return login.toString();
+        randomLogin = RandomStringUtils.randomAlphanumeric(2, 15); // Генерируем случайный логин
+        randomPassword = RandomStringUtils.randomAlphanumeric(7, 15); // Генерируем случайный пароль
+
+        courierClient.createCourier(new Courier(randomLogin, randomPassword))
+                .then().log().all()
+                .assertThat().statusCode(201);
+
+        courierId = courierClient.loginCourier(new Courier(randomLogin, randomPassword)).body().path("id");        //createCourier(randomLogin, randomPassword); // Создаем курьера перед тестами
+        Assert.assertNotNull(courierId);
     }
 
-    @Before
-    public void setUp() {
-        randomLogin = generateRandomLogin(10); // Генерируем случайный логин
-        createCourier(randomLogin, password); // Создаем курьера перед тестами
-    }
-
-    @After
-    public void tearDown() {
-        deleteCourier(randomLogin); // Удаляем курьера после тестов
-    }
-
-    private void createCourier(String login, String password) {
-        given()
-                .contentType("application/json")
-                .body(String.format("{\"login\": \"%s\", \"password\": \"%s\"}", login, password))
-                .when()
-                .post("https://qa-scooter.praktikum-services.ru/api/v1/courier")
-                .then()
-                .statusCode(201)
-                .body("ok", equalTo(true));
-
-    }
-
-    private void deleteCourier(String login) {
-        given()
-                .contentType("application/json")
-                .body(String.format("{\"login\": \"%s\", \"password\": \"%s\"}", login, password))
-                .when()
-                .delete("https://qa-scooter.praktikum-services.ru/api/v1/courier")
-                .then()
-                .statusCode(200);
+    @AfterClass
+    public static void tearDown() {
+        courierClient.deleteCourier(courierId)
+                .then().log().all()
+                .assertThat().statusCode(200)
+                .body("ok", Matchers.is(true));
     }
 
     @Test
     @Step("Авторизовать курьера")
     public void loginCourierSuccessfully() {
-        given()
-                .contentType("application/json")
-                .body(String.format("{\"login\": \"%s\", \"password\": \"%s\"}", randomLogin, password))
-                .when()
-                .post(BASE_URL)
-                .then()
-                .statusCode(200)
+        courierClient.loginCourier(new Courier(randomLogin, randomPassword))
+                .then().log().all()
+                .assertThat().statusCode(200).and()
                 .body("id", notNullValue());
     }
 
     @Test
     @Step("Не авторизовать курьера с неверными данными")
     public void loginCourierWithInvalidCredentials() {
-        given()
-                .contentType("application/json")
-                .body("{\"login\": \"wrong_login\", \"password\": \"wrong_password\"}")
-                .when()
-                .post(BASE_URL)
-                .then()
-                .statusCode(404)
+        courierClient.loginCourier(new Courier(RandomStringUtils.randomAlphanumeric(2, 15), "wrong_password"))
+                .then().log().all()
+                .assertThat().statusCode(404).and()
                 .body("message", equalTo("Учетная запись не найдена"));
     }
 
     @Test
     @Step("Авторизация без обязательных полей")
-    public void loginCourierWithoutRequiredFields() {
+    public void loginCourierWithoutLogin() {
         // Пробуем авторизоваться без логина
-        given()
-                .contentType("application/json")
-                .body("{\"password\": \"" + password + "\"}") // Пропускаем логин
-                .when()
-                .post(BASE_URL)
-                .then()
-                .statusCode(404)
+        courierClient.loginCourier(new Courier("", randomPassword)) // Пропускаем логин
+                .then().log().all()
+                .assertThat().statusCode(400).and()
                 .body("message", equalTo("Недостаточно данных для входа"));
+    }
 
+    @Test
+    @Step("Авторизация без обязательных полей")
+    public void loginCourierWithoutPassword() {
         // Пробуем авторизоваться без пароля
-        given()
-                .contentType("application/json")
-                .body(String.format("{\"login\": \"%s\"}", randomLogin)) // Пропускаем пароль
-                .when()
-                .post(BASE_URL)
-                .then()
-                .statusCode(400)
+        courierClient.loginCourier(new Courier(randomLogin, "")) // Пропускаем пароль
+                .then().log().all()
+                .assertThat().statusCode(400).and()
                 .body("message", equalTo("Недостаточно данных для входа"));
     }
 }

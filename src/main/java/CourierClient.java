@@ -6,9 +6,10 @@ import io.restassured.response.Response;
 import static io.restassured.RestAssured.given;
 
 public class CourierClient {
-    private static final String BASE_URL = "https://qa-scooter.praktikum-services.ru/";
-    private static final String CREATE_COURIER_ENDPOINT = "api/v1/courier";
-    private static final String LOGIN_COURIER_ENDPOINT = "api/v1/courier/login";
+    public static final String BASE_URL = "https://qa-scooter.praktikum-services.ru/";
+    public static final String CREATE_COURIER_ENDPOINT = "api/v1/courier";
+    public static final String DELETE_COURIER_ENDPOINT = "api/v1/courier/{id}";
+    public static final String LOGIN_COURIER_ENDPOINT = "api/v1/courier/login";
 
     @Step("Создание курьера, проверка кода ответа")
     public Response createCourier(Courier courier) {
@@ -33,6 +34,20 @@ public class CourierClient {
                 .body(courier)
                 .when()
                 .post(BASE_URL + LOGIN_COURIER_ENDPOINT)
+                .then()
+                .log().all()
+                .extract()
+                .response();
+    }
+
+    @Step("Удаление курьера, проверка кода ответа")
+    public Response deleteCourier(Integer id) {
+        return given()
+                .log().all()
+                .filter(new AllureRestAssured())
+                .pathParam("id", id)
+                .when()
+                .delete(BASE_URL + DELETE_COURIER_ENDPOINT)
                 .then()
                 .log().all()
                 .extract()
