@@ -80,7 +80,7 @@
                 <version>${allure.plugin.version}</version>
                 <configuration>
                     <reportDirectory>${project.build.directory}/allure-report</reportDirectory>
-                    <reportVersion>${allure.plugin.version}</reportVersion>
+                    <reportVersion>${allure.version}</reportVersion>
                 </configuration>
             </plugin>
         </plugins>
