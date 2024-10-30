@@ -14,8 +14,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <aspectj.version>1.9.7</aspectj.version>
-        <allure.version>2.9.0</allure.version>
-        <allure.plugin.version>2.9</allure.plugin.version>
+        <allure.version>2.25.0</allure.version>
+        <allure.plugin.version>2.13.0</allure.plugin.version>
     </properties>
 
     <build>
@@ -124,6 +124,18 @@
             <artifactId>allure-junit4</artifactId>
             <scope>runtime</scope>
             <version>${allure.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.13.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.9</version>
         </dependency>
 
     </dependencies>
