@@ -1,4 +1,4 @@
-public class Orders {
+public class Order {
     private String firstName;
     private String lastName;
     private String address;
@@ -9,7 +9,10 @@ public class Orders {
     private String comment;
     private String[] color;
 
-    public Orders(String firstName, String lastName, String address, int metroStation, String phone, int rentTime, String deliveryDate, String comment, String[] color) {
+    public Order() {
+    }
+
+    public Order(String firstName, String lastName, String address, int metroStation, String phone, int rentTime, String deliveryDate, String comment, String[] color) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.address = address;

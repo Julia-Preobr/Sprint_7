@@ -10,6 +10,8 @@ public class CourierClient {
     public static final String CREATE_COURIER_ENDPOINT = "api/v1/courier";
     public static final String DELETE_COURIER_ENDPOINT = "api/v1/courier/{id}";
     public static final String LOGIN_COURIER_ENDPOINT = "api/v1/courier/login";
+    public static final String ORDERS_ENDPOINT = "api/v1/orders";
+    public static final String CANCEL_ORDER_ENDPOINT = "api/v1/orders/cancel";
 
     @Step("Создание курьера, проверка кода ответа")
     public Response createCourier(Courier courier) {
