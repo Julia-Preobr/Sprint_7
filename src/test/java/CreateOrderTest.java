@@ -1,4 +1,4 @@
-import io.qameta.allure.Step;
+import io.qameta.allure.junit4.DisplayName;
 import io.restassured.http.ContentType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -6,8 +6,6 @@ import org.junit.runners.Parameterized;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.notNullValue;
-
-
 
 @RunWith(Parameterized.class)
 public class CreateOrderTest {
@@ -19,16 +17,16 @@ public class CreateOrderTest {
 
     @Parameterized.Parameters
     public static Object[][] provideColors() {
-        return new Object[][] {
-                { new String[] {"BLACK"} },
-                { new String[] {"GREY"} },
-                { new String[] {"BLACK", "GREY"} },
-                { new String[] {} }
+        return new Object[][]{
+                {new String[]{"BLACK"}},
+                {new String[]{"GREY"}},
+                {new String[]{"BLACK", "GREY"}},
+                {new String[]{}}
         };
     }
 
     @Test
-    @Step("Создать заказ с цветами {0}")
+    @DisplayName("Создать заказ с цветами {0}")
     public void createOrderWithColors() {
         // Выполняем POST запрос и проверяем ответ
         given()
@@ -43,4 +41,5 @@ public class CreateOrderTest {
                 .then()
                 .statusCode(201)
                 .body("track", notNullValue());
-    }}
+    }
+}

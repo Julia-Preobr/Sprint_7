@@ -1,4 +1,4 @@
-import io.qameta.allure.Step;
+import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
 import org.hamcrest.Matchers;
 import org.junit.Test;
@@ -9,7 +9,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
 
 public class GetOrdersTest {
     @Test
-    @Step("Создать заказ с цветами")
+    @DisplayName("Создать заказ с цветами")
     public void createOrderWithColors() {
         String[] colors = {"BLACK", "GREY"};
 
@@ -40,14 +40,14 @@ public class GetOrdersTest {
 
         System.out.println("Созданный заказ: " + response.body().asString());
 
-        Integer track = response.body().path("id");
+        Integer track = response.body().path("track");
 
         // Отменить заказ
         given()
                 .contentType("application/json")
-                .body("{\"track\": " + track + "}") // Используем объект Orders
+                .body("{\"track\":" + track + "}") // Используем объект Orders
                 .when()
-                .post(CourierClient.BASE_URL + CourierClient.CANCEL_ORDER_ENDPOINT)
+                .put(CourierClient.BASE_URL + CourierClient.CANCEL_ORDER_ENDPOINT)
                 .then()
                 .statusCode(200)
                 .body("ok", Matchers.is(true)) // Проверяем, что трек не null
@@ -56,7 +56,7 @@ public class GetOrdersTest {
     }
 
     @Test
-    @Step("Попытка создать заказ с ошибками")
+    @DisplayName("Попытка создать заказ с ошибками")
     public void createOrderWithEmptyBody() {
         // Пример создания заказа без обязательных полей
         given()
@@ -70,7 +70,7 @@ public class GetOrdersTest {
     }
 
     @Test
-    @Step("Попытка создать заказ с ошибками")
+    @DisplayName("Попытка создать заказ с ошибками")
     public void createOrderWithoutFirstName() {
         // Попытка создания заказа без необходимых полей
         String[] colors = {"BLACK", "GREY"};

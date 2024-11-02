@@ -1,4 +1,4 @@
-import io.qameta.allure.Step;
+import io.qameta.allure.junit4.DisplayName;
 import io.restassured.RestAssured;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.Matchers;
@@ -29,7 +29,8 @@ public class LoginCourierTest {
                 .then().log().all()
                 .assertThat().statusCode(201);
 
-        courierId = courierClient.loginCourier(new Courier(randomLogin, randomPassword)).body().path("id");        //createCourier(randomLogin, randomPassword); // Создаем курьера перед тестами
+        courierId = courierClient.loginCourier(new Courier(randomLogin, randomPassword))
+                .body().path("id"); // Создаем курьера перед тестами
         Assert.assertNotNull(courierId);
     }
 
@@ -42,7 +43,7 @@ public class LoginCourierTest {
     }
 
     @Test
-    @Step("Авторизовать курьера")
+    @DisplayName("Авторизовать курьера")
     public void loginCourierSuccessfully() {
         courierClient.loginCourier(new Courier(randomLogin, randomPassword))
                 .then().log().all()
@@ -51,7 +52,7 @@ public class LoginCourierTest {
     }
 
     @Test
-    @Step("Не авторизовать курьера с неверными данными")
+    @DisplayName("Не авторизовать курьера с неверными данными")
     public void loginCourierWithInvalidCredentials() {
         courierClient.loginCourier(new Courier(RandomStringUtils.randomAlphanumeric(2, 15), "wrong_password"))
                 .then().log().all()
@@ -60,7 +61,7 @@ public class LoginCourierTest {
     }
 
     @Test
-    @Step("Авторизация без обязательных полей")
+    @DisplayName("Авторизация без обязательных полей")
     public void loginCourierWithoutLogin() {
         // Пробуем авторизоваться без логина
         courierClient.loginCourier(new Courier("", randomPassword)) // Пропускаем логин
@@ -70,7 +71,7 @@ public class LoginCourierTest {
     }
 
     @Test
-    @Step("Авторизация без обязательных полей")
+    @DisplayName("Авторизация без обязательных полей")
     public void loginCourierWithoutPassword() {
         // Пробуем авторизоваться без пароля
         courierClient.loginCourier(new Courier(randomLogin, "")) // Пропускаем пароль

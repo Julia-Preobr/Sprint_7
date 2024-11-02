@@ -1,5 +1,5 @@
 import io.qameta.allure.Description;
-import io.qameta.allure.Step;
+import io.qameta.allure.junit4.DisplayName;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -37,7 +37,7 @@ public class CreateCourierTest {
     }
 
     @Test
-    @Step("Создание учетной записи курьера")
+    @DisplayName("Создание учетной записи курьера")
     @Description("Проверка состояние кода и значений для полей /api/v1/courier")
     public void createCourierTest() {
         String firstName = RandomStringUtils.randomAlphabetic(2, 18);
@@ -48,7 +48,7 @@ public class CreateCourierTest {
     }
 
     @Test
-    @Step("Создание курьера без имени курьера")
+    @DisplayName("Создание курьера без имени курьера")
     @Description("Проверка состояние кода и сообщение при создании курьера без имени курьера")
     public void creatingCourierWithoutFirstName() {
         courierClient.createCourier(new Courier(randomLogin, randomPassword))
@@ -58,11 +58,8 @@ public class CreateCourierTest {
     }
 
 
-    // Тест падает из-за некорректного сообщения, поэтому поставила Matchers.notNullValue()
-    // Ожидаемый результат: сообщение с текстом "Этот логин уже используется".
-    // Фактический результат: сообщение с текстом "Этот логин уже используется. Попробуйте другой."
     @Test
-    @Step("Создание курьеров с одинаковыми логинами")
+    @DisplayName("Создание курьеров с одинаковыми логинами")
     @Description("Проверка состояние кода и сообщение при создании двух курьеров с одинаковыми логинами")
     public void creatingTwoIdenticalLoginCouriers() {
         String firstName = RandomStringUtils.randomAlphabetic(2, 18);
@@ -76,9 +73,8 @@ public class CreateCourierTest {
                 .body("message", Matchers.equalTo("Этот логин уже используется. Попробуйте другой."));
     }
 
-
     @Test
-    @Step("Создание курьера без логина")
+    @DisplayName("Создание курьера без логина")
     @Description("Проверка состояние кода и сообщение при создании курьера без логина")
     public void creatingCourierWithoutLogin() {
         Response postRequestCreateCourier = courierClient.createCourier(new Courier("", "secret", "empty"));
@@ -88,7 +84,7 @@ public class CreateCourierTest {
     }
 
     @Test
-    @Step("Создание курьера без пароля")
+    @DisplayName("Создание курьера без пароля")
     @Description("Проверка состояние кода и сообщение при создании курьера без пароля")
     public void creatingCourierWithoutPassword() {
         Response postRequestCreateCourier = courierClient.createCourier(new Courier("julia", "", "tester"));
@@ -98,7 +94,7 @@ public class CreateCourierTest {
     }
 
     @Test
-    @Step("Создание курьера без логина и пароля")
+    @DisplayName("Создание курьера без логина и пароля")
     @Description("Проверка состояние кода и сообщение при создании курьера без логина и пароля")
     public void creatingCourierWithoutLoginAndPassword() {
         Response postRequestCreateCourier = courierClient.createCourier(new Courier("", "", "tester"));
